@@ -8,12 +8,12 @@ import random
 import pandas as pd
 import shutil
 from tqdm.auto import tqdm
-import PyPDF2
-from pdf2image import convert_from_path
+from pdf2image import convert_from_bytes
 from transformers import AutoTokenizer
 import csv
 from filelock import FileLock
 import os
+import io
 
 def remove_lock_file(file_path):
     lock_file = f"{file_path}.lock"
@@ -44,7 +44,6 @@ def html_to_markdown(html_content):
 def process_html(args):
     idx, html_content = args
 
-    # Read the HTML content
     soup = BeautifulSoup(html_content, 'lxml')
     all_elements = soup.find_all(recursive=True)
 
@@ -63,37 +62,35 @@ def process_html(args):
             num_columns = 2 if random.random() < 0.05 else 1
         )
         
-        pdf_path = dataset_output_path / f"{str(idx).zfill(5)}.pdf"
-        html = weasyprint.HTML(string=html_to_render).render()
-        html.write_pdf(pdf_path)
-
-        # Open the PDF file in read-binary mode
-        with open(pdf_path, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
-            number_of_pages = len(reader.pages)
-
-        if number_of_pages > 1:
-            print(f"PDF file {pdf_path} has more than one page, deleting...")
-            pdf_path.unlink()
+        html = weasyprint.HTML(string=html_to_render)
+        document = html.render()
+        
+        if len(document.pages) > 1:
+            print(f"Document has more than one page, skipping...")
             continue
-        else:
-            markdown = html_to_markdown(str(element)).strip()
-            num_tokens = len(tokenizer.tokenize(markdown, add_special_tokens=False))
-            if num_tokens < 5:
-                print(f"Markdown content is too short, skipping...")
-                pdf_path.unlink()
-                continue
-            images = convert_from_path(pdf_path)
-            image_path = pdf_path.parent / f"{pdf_path.stem}_{jdx}.png"
-            images[0].save(image_path, 'PNG')
-            pdf_path.unlink()
 
-            # Append to metadata.csv with lock
-            metadata = [image_path.name, markdown]
-            with FileLock(f"{metadata_file}.lock"):
-                with open(metadata_file, "a", newline='', encoding='utf-8') as f:
-                    csv_writer = csv.writer(f)
-                    csv_writer.writerow(metadata)
+        # Instead of writing to disk, we'll use BytesIO
+        pdf_bytes = io.BytesIO()
+        document.write_pdf(pdf_bytes)
+        pdf_bytes.seek(0)
+
+        markdown = html_to_markdown(str(element)).strip()
+        num_tokens = len(tokenizer.tokenize(markdown, add_special_tokens=False))
+        if num_tokens < 5:
+            print(f"Markdown content is too short, skipping...")
+            continue
+
+        # Convert PDF bytes to image
+        images = convert_from_bytes(pdf_bytes.getvalue())
+        image_path = dataset_output_path / f"{str(idx).zfill(5)}_{jdx}.png"
+        images[0].save(image_path, 'PNG')
+
+        # Append to metadata.csv with lock
+        metadata = [image_path.name, markdown]
+        with FileLock(f"{metadata_file}.lock"):
+            with open(metadata_file, "a", newline='', encoding='utf-8') as f:
+                csv_writer = csv.writer(f)
+                csv_writer.writerow(metadata)
 
 if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(Path(__file__).parent / "arabic-nougat-tokenizer")
@@ -192,11 +189,11 @@ if __name__ == "__main__":
 """
     # Login using e.g. `huggingface-cli login` to access this dataset
     ds = load_dataset("MohamedRashad/hindawi-dataset", split="train")
-    df = pd.DataFrame(ds)[8000:10000]
+    df = pd.DataFrame(ds)[:10]
     print(f"Total records: {len(df)}")
 
     # Use multiprocessing to parallelize the processing with a progress bar
-    with multiprocessing.Pool(48) as pool:
+    with multiprocessing.Pool(64) as pool:
         list(tqdm(pool.imap(process_html, enumerate(df["html_content"])), total=len(df)))
 
     # Remove lock file

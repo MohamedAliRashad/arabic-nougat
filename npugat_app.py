@@ -8,7 +8,7 @@ import arabic_reshaper
 # Load the model and processor
 processor = NougatProcessor.from_pretrained(Path(__file__).parent / "arabic-nougat")
 model = VisionEncoderDecoderModel.from_pretrained(
-    "/shared_volume/rashad/playground/arabic_nougat/arabic_nougat_logs/checkpoint-8400", torch_dtype=torch.bfloat16
+    Path(__file__).parent / "arabic-nougat", torch_dtype=torch.bfloat16
 )
 decoder = MBartForCausalLM._from_config(model.decoder.config, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
 decoder.load_state_dict(model.decoder.state_dict())
@@ -37,4 +37,4 @@ def predict(img_path):
     page_sequence = get_display(arabic_reshaper.reshape(page_sequence))
     return page_sequence
 
-print(predict("book_page.jpeg"))
+print(predict(Path(__file__).parent / "book_page.jpeg"))
