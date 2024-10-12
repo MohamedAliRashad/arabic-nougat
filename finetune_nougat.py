@@ -40,7 +40,6 @@ print(config)
 model_size = sum(p.numel() for p in model.parameters()) / 1e9
 print(f"Model size: {model_size}")
 
-# dataset_path = Path(__file__).parent / "nougat_dataset"
 dataset_path = Path(__file__).parent / "hindawi_dataset2"
 dataset = load_dataset("imagefolder", data_dir=dataset_path, split="train")
 dataset = dataset.shuffle(seed=42)
