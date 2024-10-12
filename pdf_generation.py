@@ -14,6 +14,7 @@ import csv
 from filelock import FileLock
 import os
 import io
+from colorama import Fore
 
 def remove_lock_file(file_path):
     lock_file = f"{file_path}.lock"
@@ -62,11 +63,15 @@ def process_html(args):
             num_columns = 2 if random.random() < 0.05 else 1
         )
         
-        html = weasyprint.HTML(string=html_to_render)
-        document = html.render()
-        
+        try:
+            html = weasyprint.HTML(string=html_to_render)
+            document = html.render()
+        except ZeroDivisionError as e:
+            print(f"Error processing HTML at index {idx}, skipping...")
+            continue
+
         if len(document.pages) > 1:
-            print(f"Document has more than one page, skipping...")
+            # print(f"Document has more than one page, skipping...")
             continue
 
         # Instead of writing to disk, we'll use BytesIO
@@ -77,7 +82,7 @@ def process_html(args):
         markdown = html_to_markdown(str(element)).strip()
         num_tokens = len(tokenizer.tokenize(markdown, add_special_tokens=False))
         if num_tokens < 5:
-            print(f"Markdown content is too short, skipping...")
+            # print(f"Markdown content is too short, skipping...")
             continue
 
         # Convert PDF bytes to image
@@ -91,6 +96,8 @@ def process_html(args):
             with open(metadata_file, "a", newline='', encoding='utf-8') as f:
                 csv_writer = csv.writer(f)
                 csv_writer.writerow(metadata)
+
+    print(f"Processed book number {Fore.GREEN}{idx}{Fore.RESET}")
 
 if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(Path(__file__).parent / "arabic-nougat-tokenizer")
@@ -128,7 +135,7 @@ if __name__ == "__main__":
     ]
     available_font_weights = [400, 500, 600, 700, 800, 900]
     available_font_sizes = [14, 16, 20, 24, 28, 32, 34, 36, 38, 40]
-    dataset_output_path = Path(__file__).parent / "hindawi_dataset3"
+    dataset_output_path = Path(__file__).parent / "hindawi_dataset"
     if dataset_output_path.exists():
         shutil.rmtree(dataset_output_path)
     dataset_output_path.mkdir(exist_ok=True)
@@ -138,7 +145,7 @@ if __name__ == "__main__":
     # Write CSV header
     with open(metadata_file, "w", newline='', encoding='utf-8') as f:
         csv_writer = csv.writer(f)
-        csv_writer.writerow(["image_path", "markdown"])
+        csv_writer.writerow(["file_name", "markdown"])
 
     html_text = """<!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -189,11 +196,11 @@ if __name__ == "__main__":
 """
     # Login using e.g. `huggingface-cli login` to access this dataset
     ds = load_dataset("MohamedRashad/hindawi-dataset", split="train")
-    df = pd.DataFrame(ds)[:10]
+    df = pd.DataFrame(ds)
     print(f"Total records: {len(df)}")
 
     # Use multiprocessing to parallelize the processing with a progress bar
-    with multiprocessing.Pool(64) as pool:
+    with multiprocessing.Pool(128) as pool:
         list(tqdm(pool.imap(process_html, enumerate(df["html_content"])), total=len(df)))
 
     # Remove lock file
