@@ -35,9 +35,8 @@ def html_to_markdown(html_content):
             tag.decompose()
 
     h = html2text.HTML2Text()
-    h.ignore_links = False
-    h.ignore_images = False
-    h.ignore_emphasis = False
+    h.ignore_links = True
+    h.ignore_emphasis = True
     h.body_width = 0
     
     return h.handle(str(soup))
@@ -47,6 +46,8 @@ def process_html(args):
 
     soup = BeautifulSoup(html_content, 'lxml')
     all_elements = soup.find_all(recursive=True)
+    num_elements = int(0.2*len(all_elements))
+    all_elements = random.sample(all_elements, num_elements)
 
     for jdx, element in enumerate(all_elements):
         random_width, random_height = random.choice(available_target_size)
@@ -81,7 +82,7 @@ def process_html(args):
 
         markdown = html_to_markdown(str(element)).strip()
         num_tokens = len(tokenizer.tokenize(markdown, add_special_tokens=False))
-        if num_tokens < 5:
+        if num_tokens > 8192 or num_tokens < 1024:
             # print(f"Markdown content is too short, skipping...")
             continue
 
@@ -100,42 +101,29 @@ def process_html(args):
     print(f"Processed book number {Fore.GREEN}{idx}{Fore.RESET}")
 
 if __name__ == "__main__":
-    tokenizer = AutoTokenizer.from_pretrained(Path(__file__).parent / "arabic-nougat-tokenizer")
+    tokenizer = AutoTokenizer.from_pretrained("MohamedRashad/arabic-large-nougat")
+    # tokenizer = AutoTokenizer.from_pretrained("facebook/nougat-base")
+
     available_target_size = [
         (672, 896),   # Base Nougat model size
-        (612, 792),   # US Letter (8.5" x 11")
-        (612, 1008),  # US Legal (8.5" x 14")
-        (792, 1224),  # Tabloid (11" x 17")
-        (672, 896),   # Base Nougat model size
-        (1191, 1684), # A2
-        (842, 1191),  # A3
-        (595, 842),   # A4
-        (420, 595),   # A5
-        (298, 420),   # A6
-        (729, 1032),  # B4
-        (516, 729),   # B5
-        (1032, 1456), # B3
-        (672, 896),   # Base Nougat model size
-        (841, 1189),  # C4 Envelope
-        (624, 918),   # C5 Envelope
-        (458, 648),   # C6 Envelope
-        (709, 1001),  # RA4
-        (607, 860),   # RA5
-        (672, 896),   # Base Nougat model size
-        (684, 1000),  # DL Envelope
-        (850, 1100),  # ANSI A
+        (595, 842),   # A4 (most common for Arabic books)
+        (612, 792),   # US Letter
+        (516, 729),   # B5 (common for books)
         (672, 896),   # Base Nougat model size
     ]
     available_fonts = [
-        "Rubik", "Cairo", "Almarai", "Tajawal", "IBM Plex Sans Arabic", "Amiri", "Changa",
-        "El Messiri", "Noto Nashh Arabic", "Readex Pro", "Baloo Bhaijaan 2", "Mada",
-        "Lalezar", "Reem Kufi", "Lemonada", "Alexandria", "Vazirmatn", "Lateef",
-        "Jomhuria", "Aref Ruqaa", "Rakkas", "Mirza", "Ruwudu", "Katibeh", "Gulzar",
-        "Marhey", "Noto Kufi Arabic", "Noto Sans Arabic",
+        "Amiri",              # Very common in academic books
+        "Noto Naskh Arabic",  # Excellent readability
+        "Cairo",             # Modern and clear
+        "IBM Plex Sans Arabic", # Professional looking
+        "Almarai",           # Clear and modern
+        "Tajawal",           # Good readability
+        "Noto Kufi Arabic",  # Good for headers
     ]
-    available_font_weights = [400, 500, 600, 700, 800, 900]
-    available_font_sizes = [14, 16, 20, 24, 28, 32, 34, 36, 38, 40]
-    dataset_output_path = Path(__file__).parent / "hindawi_dataset"
+
+    available_font_sizes = [14, 16, 18, 20]  # More reasonable sizes for Arabic text
+    available_font_weights = [400, 500, 600]  # Reduced weights for better clarity
+    dataset_output_path = Path(__file__).parent / "hindawi_dataset_eval"
     if dataset_output_path.exists():
         shutil.rmtree(dataset_output_path)
     dataset_output_path.mkdir(exist_ok=True)
@@ -194,9 +182,11 @@ if __name__ == "__main__":
 </body>
 </html>
 """
+
     # Login using e.g. `huggingface-cli login` to access this dataset
     ds = load_dataset("MohamedRashad/hindawi-dataset", split="train")
     df = pd.DataFrame(ds)
+    df = df.sample(10)
     print(f"Total records: {len(df)}")
 
     # Use multiprocessing to parallelize the processing with a progress bar

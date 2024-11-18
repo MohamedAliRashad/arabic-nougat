@@ -1,18 +1,17 @@
+# Usage: python try_nougat.py
+# To try the model on a sample image
+# Make sure you are on tha latest version of transformers
+
 from PIL import Image
 import torch
-from transformers import NougatProcessor, VisionEncoderDecoderModel, MBartForCausalLM
+from transformers import NougatProcessor, VisionEncoderDecoderModel
 from pathlib import Path
 from bidi.algorithm import get_display
 import arabic_reshaper
 
 # Load the model and processor
-processor = NougatProcessor.from_pretrained(Path(__file__).parent / "arabic-nougat")
-model = VisionEncoderDecoderModel.from_pretrained(
-    Path(__file__).parent / "arabic-nougat", torch_dtype=torch.bfloat16
-)
-decoder = MBartForCausalLM._from_config(model.decoder.config, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
-decoder.load_state_dict(model.decoder.state_dict())
-model.decoder = decoder
+processor = NougatProcessor.from_pretrained("MohamedRashad/arabic-large-nougat")
+model = VisionEncoderDecoderModel.from_pretrained("MohamedRashad/arabic-large-nougat", torch_dtype=torch.bfloat16, attn_implementation={"decoder": "flash_attention_2", "encoder": "eager"})
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
@@ -29,6 +28,7 @@ def predict(img_path):
         pixel_values.to(device),
         min_length=1,
         max_new_tokens=context_length,
+        repetition_penalty=1.5,
         bad_words_ids=[[processor.tokenizer.unk_token_id]],
         eos_token_id=processor.tokenizer.eos_token_id,
     )
