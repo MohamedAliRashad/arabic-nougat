@@ -42,12 +42,7 @@ models_supported = {
 
 
 # Load dataset
-dataset_path = Path(__file__).parent / "hindawi_dataset_large"
-test_dataset = load_dataset("imagefolder", data_dir=dataset_path, split="train")
-test_dataset = test_dataset.shuffle(seed=42)
-df = test_dataset.to_pandas()
-df = df.drop_duplicates(subset=["markdown"])
-test_dataset = Dataset.from_pandas(df, preserve_index=False).cast_column("image", features.Image())
+test_dataset = load_dataset("MohamedRashad/arabic-img2md")
 test_dataset = test_dataset.shuffle(seed=42).select(range(100 * 16))
 
 def process_batch(batch, model_name):
