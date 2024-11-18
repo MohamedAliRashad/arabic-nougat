@@ -78,7 +78,7 @@ Arabic-Nougat is tailored to process Arabic text, handling the unique challenges
 
 ### Evaluate Models
 
-Evaluate the performance of Arabic-Nougat models on a dataset (Check the paper to know the numbers reported):
+Evaluate the performance of Arabic-Nougat models on a dataset
 ```bash
 python eval_model.py
 ```
@@ -87,6 +87,8 @@ python eval_model.py
   - Character Error Rate (CER)
   - Word Error Rate (WER)
   - Markdown Structure Accuracy (custom metric, check the paper to learn more)
+
+**Note:** Won't produce the same numbers present in the paper as the eval dataset is not open.
 
 ### Fine-Tune Models
 
