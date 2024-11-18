@@ -2,6 +2,8 @@
 
 Arabic-Nougat is a suite of Optical Character Recognition (OCR) models designed to extract structured text in Markdown format from Arabic book pages. This repository provides tools for fine-tuning, evaluation, dataset preparation, and tokenizer analysis for the Arabic-Nougat models, which build on Meta’s Nougat architecture.
 
+![arxiv_paper2_page-0001](https://github.com/user-attachments/assets/028a77b4-8ca3-4e21-a3f9-84b1999550e6)
+
 ## Table of Contents
 
 - [Overview](#overview)
