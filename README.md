@@ -1,9 +1,29 @@
-# Arabic-Nougat
+# Arabic-Nougat: Fine-Tuning Vision Transformers for Arabic OCR and Markdown Extraction
 
-Arabic-Nougat is a suite of Optical Character Recognition (OCR) models designed to extract structured text in Markdown format from Arabic book pages. This repository provides tools for fine-tuning, evaluation, dataset preparation, and tokenizer analysis for the Arabic-Nougat models, which build on Meta’s Nougat architecture.
+<h4 align="center">
+
+<div align="center">
+<img src="https://img.shields.io/badge/Version-1.0.0-blue.svg" alt="Version"> 
+<img src="https://img.shields.io/badge/License-Apache%202.0-green.svg" alt="License">
+<img src="https://img.shields.io/github/stars/MohamedAliRashad/arabic-nougat?color=yellow" alt="Stars">
+<img src="https://img.shields.io/github/issues/MohamedAliRashad/arabic-nougat?color=red" alt="Issues">
+<img src="https://img.shields.io/badge/python-3.8-purple.svg" alt="Python">
+
+</h4>
+
+
+<div align="center">
+<!-- **Affiliations:** -->
+
+:octocat: [**Github**](https://github.com/MohamedAliRashad/arabic-nougat)  🤗  [**Hugging Face**](https://huggingface.co/MohamedRashad/arabic-nougat-673a3f540bd92904c9b92a8e) 📝  [**Paper**](https://arxiv.org/abs/2411.17835) 🗂️  [**Data**](https://huggingface.co/datasets/MohamedRashad/arabic-img2md) 📽️  [**Demo**](https://huggingface.co/spaces/MohamedRashad/Arabic-Nougat)
+
+</div>
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/028a77b4-8ca3-4e21-a3f9-84b1999550e6" width="60%">
 </p>
+
+Arabic-Nougat is a suite of Optical Character Recognition (OCR) models designed to extract structured text in Markdown format from Arabic book pages. This repository provides tools for fine-tuning, evaluation, dataset preparation, and tokenizer analysis for the Arabic-Nougat models, which build on Meta’s Nougat architecture.
 
 
 ## Table of Contents
