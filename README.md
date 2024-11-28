@@ -15,7 +15,7 @@
 <div align="center">
 <!-- **Affiliations:** -->
 
-:octocat: [**Github**](https://github.com/MohamedAliRashad/arabic-nougat)  🤗  [**Hugging Face**](https://huggingface.co/MohamedRashad/arabic-nougat-673a3f540bd92904c9b92a8e) 📝  [**Paper**](https://arxiv.org/abs/2411.17835) 🗂️  [**Data**](https://huggingface.co/datasets/MohamedRashad/arabic-img2md) 📽️  [**Demo**](https://huggingface.co/spaces/MohamedRashad/Arabic-Nougat)
+:octocat: [**Github**](https://github.com/MohamedAliRashad/arabic-nougat)  🤗  [**Hugging Face**](https://huggingface.co/collections/MohamedRashad/arabic-nougat-673a3f540bd92904c9b92a8e) 📝  [**Paper**](https://arxiv.org/abs/2411.17835) 🗂️  [**Data**](https://huggingface.co/datasets/MohamedRashad/arabic-img2md) 📽️  [**Demo**](https://huggingface.co/spaces/MohamedRashad/Arabic-Nougat)
 
 </div>
 
